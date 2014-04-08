@@ -6,13 +6,15 @@
  */
 
 #define USE_OR_MASKS
-#define _XTAL_FREQ 8000000
+#define _XTAL_FREQ      8000000
 #define DOWNLOAD_BUTTON PORTBbits.RB4
-#define MESURE_BUTTON PORTBbits.RB3
+#define MESURE_BUTTON   PORTBbits.RB3
+#define RS232_CONFIG    USART_TX_INT_OFF | USART_RX_INT_OFF | USART_ASYNCH_MODE\
+             | USART_EIGHT_BIT | USART_CONT_RX | USART_BRGH_LOW
+#define RS232_PBRG      12
+
 
 #include <xc.h>
-#include <pic18.h>
-#include <htc.h>
 #include <plib/i2c.h>
 #include <stdio.h>
 #include <stdlib.h>    
@@ -27,92 +29,72 @@ void putch(char data); // Pour utiliser printf sur RS232
 char getch(); // Pour utiliser sur RS232
 char getche(); // Pour utiliser gets sur RS232
 
-
 int main(int argc, char** argv) {
     char ds1307[7]; // registres 0 a 6 du ds1307
-    char jours_sem[7][9] = {"dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"};
-    char config, spbrg;
+    char weeks_day[][] = {"dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"};
     char rep[10];
+    char config;
+    OSCCON = 0b01110010;
+    ADCON1 = 0xff;
+    OpenUSART(RS232_CONFIG, RS232_PBRG); //9600 BAUD, rs232
+    OpenI2C(MASTER, SLEW_ON);
 
-    /********** Initialisation des registres **********/
-    ???         // Aucune entree analogique
-    ???    		// Oscillateur interne 8MHz
-    ???         // Tx en sortie (on laisse les broches I2C en entrees, par defaut)
+    printf("\n\rLabo I2C: Appareil de mesure de distances\n\r");
 
-    // Pour la communication serie asynchrone (RS232 - 9600 baud)
-    config = USART_TX_INT_OFF |
-             USART_RX_INT_OFF |
-             USART_ASYNCH_MODE |
-             USART_EIGHT_BIT |
-             USART_CONT_RX |
-             USART_BRGH_LOW;
-    spbrg = 12;         // a 8mhZ 12 -> 9600 BAUD
-    OpenUSART(config, spbrg);
+    // ---------- Affichage du temps du DS1307 sur terminal ---------------
+    //lecture_ds1307(ds1307);
+    printf("???", ? ? ?); // Afficher jour-date-temps(sauf secondes)
 
-    // Pour la communication I2C
-    ???		// I2C en mode MASTER avec vitesse compatible au DS1307
-    ??? 	// Valeur de reload du compteur pour la generation de SCL: (Fosc/4)/Fscl - 1
+    puts("Configuration de l'horloge (o/n)?");
+    config = getch();
 
-/******** Fin de l'initialisation des registres ********/
+    if (config == 'o') {
+        // Recuperer les informations puis les formater et les mettre a la bonne place dans le tableau "ds1307" - xtoi() peut etre tres utile
+        // Attention aux bits speciaux du registre (CH, mode 24h...)
+        printf("\n\rAnnee (XX)? ");
+        gets(rep);
+        ? ? ?
+        printf("Mois (XX)? ");
+        gets(rep);
+        ? ? ?
+        printf("Date (XX)? ");
+        gets(rep);
+        ? ? ?
+        printf("Jour de semaine 1-7 ? ");
+        gets(rep);
+        ? ? ?
+        printf("\n\rHeure 0-23 (XX)? ");
+        gets(rep);
+        ? ? ?
+        printf("Minutes 0-59 (XX)? ");
+        gets(rep);
+        ? ? ?
+        ? ? ? // registre des secondes: remettre les secondes a 0 plutot que de demander a l'usager
 
-      printf("\n\rLabo I2C: Appareil de mesure de distances\n\r");
+        //ecriture_ds1307(ds1307)
+        printf("\r\nTemps modifie avec succes!\r\n");
+        printf("???", ? ? ?); // Afficher jour-date-temps(sauf secondes)
 
-// ---------- Affichage du temps du DS1307 sur terminal ---------------
-	//lecture_ds1307(ds1307);
-	printf("???",???); 	// Afficher jour-date-temps(sauf secondes)
+    }
 
-	puts("Configuration de l'horloge (o/n)?");
-	config = getch();
+    printf("\r\nPret pour mesurer!\r\n");
 
-	if (config == 'o')
-	{
-		// Recuperer les informations puis les formater et les mettre a la bonne place dans le tableau "ds1307" - xtoi() peut etre tres utile
-		// Attention aux bits speciaux du registre (CH, mode 24h...)
-		printf("\n\rAnnee (XX)? ");
-		gets(rep);
-		???
-		printf("Mois (XX)? ");
-		gets(rep);
-		???
-		printf("Date (XX)? ");
-		gets(rep);
-		???
-		printf("Jour de semaine 1-7 ? ");
-		gets(rep);
-		???
-		printf("\n\rHeure 0-23 (XX)? ");
-		gets(rep);
-		???
-		printf("Minutes 0-59 (XX)? ");
-		gets(rep);
-		???
-		???	// registre des secondes: remettre les secondes a 0 plutot que de demander a l'usager
-
-		ecriture_ds1307(ds1307);
-		printf("\r\nTemps modifie avec succes!\r\n");
-        printf("???",???); 	// Afficher jour-date-temps(sauf secondes)
-
-	}
-
-	printf("\r\nPret pour mesurer!\r\n");
-
-	while(1)
-	{
-//		Contenu des seances du 18 et 25 mars
-	}
+    while (1) {
+        //		Contenu des seances du 18 et 25 mars
+    }
     return (EXIT_SUCCESS);
 }
 
-void putch(char data){
-    while(!TXIF);
-    TXREG=data;
+void putch(char data) {
+    while (!TXIF);
+    TXREG = data;
 }
 
-char getch(){
-    while(!RCIF);
-    return(RCREG);
+char getch() {
+    while (!RCIF);
+    return (RCREG);
 }
 
-char getche(){
-    return(getch());
+char getche() {
+    return (getch());
 }
