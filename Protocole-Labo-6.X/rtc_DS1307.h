@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-    
+void rtc_DS1307_readTime(char addr_i2c, char* time);
 
 
 #ifdef	__cplusplus
