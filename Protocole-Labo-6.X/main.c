@@ -98,3 +98,5 @@ char getch() {
 char getche() {
     return (getch());
 }
+
+//test
