@@ -18,7 +18,6 @@
 #include <plib/i2c.h>
 #include <stdio.h>
 #include <stdlib.h>    
-#include "eeprom_24LC1025.h"
 #include "rtc_DS1307.h"
 #include "sensor_distance_SRF02.h"
 
