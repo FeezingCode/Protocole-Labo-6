@@ -8,6 +8,8 @@
 #ifndef SENSOR_DISTANCE_SRF02_H
 #define	SENSOR_DISTANCE_SRF02_H
 
+#define
+
 #include <plib/i2c.h>
 
 #ifdef	__cplusplus
