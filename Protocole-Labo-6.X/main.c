@@ -1,6 +1,6 @@
 /* 
  * File:   main.c
- * Author: g.lagrange
+ * Author: g.lagrange & a.lineau
  *
  * Created on 8 avril 2014, 10:55
  */
@@ -30,7 +30,8 @@ char getche(); // Pour utiliser gets sur RS232
 
 int main(int argc, char** argv) {
     char ds1307[7]; // registres 0 a 6 du ds1307
-    char weeks_day[][] = {"dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"};
+    char weeks_day_french[][] = {"dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"};
+    char weeks_day_english[][] = {"sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"};
     char rep[10];
     char config;
     OSCCON = 0b01110010;
