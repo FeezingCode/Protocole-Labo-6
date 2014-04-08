@@ -20,7 +20,7 @@ int sensor_distance_SRF02_readDistance(char addr_i2c){
     char msb;
     StartI2C();
     WriteI2C(addr_i2c);
-    WriteI2C(2)
+    WriteI2C(2);
     msb = ReadI2C();
     lsb = ReadI2C();
     IdleI2C();

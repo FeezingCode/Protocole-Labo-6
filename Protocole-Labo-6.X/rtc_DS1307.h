@@ -3,6 +3,8 @@
 
 #define RTC_DS1307_TIME_I2C_ADDR    0xD0
 
+#define RTC_DS1307_DATE_TIME_ARRAY_SIZE 7
+
 #define RTC_DS1307_TIME_ARRAY_SIZE  3
 #define RTC_DS1307_TIME_ARRAY_SEC   0
 #define RTC_DS1307_TIME_ARRAY_MIN   1
@@ -39,8 +41,11 @@
 extern "C" {
 #endif
 
-    void rtc_DS1307_readDateTime(char addr_i2c, char* data, char hourFormat);
-    void rtc_DS1307_readTime(char addr_i2c, char* time, char hourFormat);
+    char rtc_DS1307_BCD_to_binary(char bcd);
+    char rtc_DS1307_binary_to_BCD(char binary);
+
+    char rtc_DS1307_readDateTime(char addr_i2c, char* data);
+    char rtc_DS1307_readTime(char addr_i2c, char* time);
     void rtc_DS1307_readDate(char addr_i2c, char* date);
 
     void rtc_DS1307_writeDateTime(char addr_i2c, char* data, char hourFormat);

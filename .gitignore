@@ -27,3 +27,14 @@
 *.mk
 *.bash
 *.properties
+*.cmf
+*.hxl
+*.lst
+*.map
+*.rlf
+*.sdb
+*.sym
+*.p1
+*.pre
+*.d
+funclist
