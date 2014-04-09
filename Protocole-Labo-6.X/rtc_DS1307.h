@@ -48,8 +48,8 @@ extern "C" {
     char rtc_DS1307_readTime(char addr_i2c, char* time);
     void rtc_DS1307_readDate(char addr_i2c, char* date);
 
-    void rtc_DS1307_writeDateTime(char addr_i2c, char* data, char hourFormat);
-    void rtc_DS1307_writeTime(char addr_i2c, char* time, char hourFormat);
+    void rtc_DS1307_writeDateTime(char addr_i2c, char* data, char hourFormat, char pm);
+    void rtc_DS1307_writeTime(char addr_i2c, char* time, char hourFormat, char pm);
     void rtc_DS1307_writeDate(char addr_i2c, char* date);
 
     void rtc_DS1307_setSQW(char addr_i2c, char config);

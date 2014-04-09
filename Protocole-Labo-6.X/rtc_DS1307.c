@@ -1,10 +1,22 @@
 #include "rtc_DS1307.h"
 
+char rtc_DS1307_BCD_to_binary(char bcd) {
+    return (bcd>>4)*10 + (bcd&0xF0);
+}
+
+char rtc_DS1307_binary_to_BCD(char binary) {
+    char bcd = binary%10;
+    binary /= 10;
+    bcd |= (binary<<4);
+    return bcd;
+}
+
 char rtc_DS1307_readDateTime(char addr_i2c, char* data) {
     char i = 0;
     char tmp = 0;
-    char hourFormat;
+    char hourFormat = 0;
     StartI2C();
+    IdleI2C();
     WriteI2C(addr_i2c);
     WriteI2C(RTC_DS1307_REGISTER_SEC);
     for (i = 0; i < RTC_DS1307_DATE_TIME_ARRAY_SIZE; i++) {
@@ -25,6 +37,7 @@ char rtc_DS1307_readDateTime(char addr_i2c, char* data) {
             data[i] = rtc_DS1307_BCD_to_binary(ReadI2C());
         }
     }
+    CloseI2C();
     IdleI2C();
     return hourFormat;
 }
@@ -34,6 +47,7 @@ char rtc_DS1307_readTime(char addr_i2c, char* time) {
     char tmp = 0;
     char hourFormat;
     StartI2C();
+    IdleI2C();
     WriteI2C(addr_i2c);
     WriteI2C(RTC_DS1307_REGISTER_SEC);
     for (i = 0; i < RTC_DS1307_TIME_ARRAY_SIZE; i++) {
@@ -54,25 +68,93 @@ char rtc_DS1307_readTime(char addr_i2c, char* time) {
             time[i] = rtc_DS1307_BCD_to_binary(ReadI2C());
         }
     }
+    CloseI2C();
     IdleI2C();
     return hourFormat;
 }
 
 void rtc_DS1307_readDate(char addr_i2c, char* date) {
     char i = 0;
-    char hourFormat;
     StartI2C();
+    IdleI2C();
     WriteI2C(addr_i2c);
     WriteI2C(RTC_DS1307_REGISTER_DAY);
     for (i = 0; i < RTC_DS1307_DATE_ARRAY_SIZE; i++) {
         date[i] = rtc_DS1307_BCD_to_binary(ReadI2C());
     }
+    CloseI2C();
     IdleI2C();
     return;
 }
 
-//void rtc_DS1307_writeDateTime(char addr_i2c, char* data, char hourFormat);
-//void rtc_DS1307_writeTime(char addr_i2c, char* time, char hourFormat);
-//void rtc_DS1307_writeDate(char addr_i2c, char* date);
+void rtc_DS1307_writeDateTime(char addr_i2c, char* data, char hourFormat, char pm) {
+    char i = 0;
+    char tmp = 0;
+    StartI2C();
+    IdleI2C();
+    WriteI2C(addr_i2c);
+    WriteI2C(RTC_DS1307_REGISTER_SEC);
+    for (i = 0; i < RTC_DS1307_DATE_TIME_ARRAY_SIZE; i++) {
+        if (i == RTC_DS1307_TIME_ARRAY_SEC) {
+            WriteI2C(rtc_DS1307_binary_to_BCD(data[RTC_DS1307_TIME_ARRAY_SEC]));
+        } else if (i == RTC_DS1307_TIME_ARRAY_HR) {
+            tmp = rtc_DS1307_binary_to_BCD(data[RTC_DS1307_TIME_ARRAY_HR]);
+            if (hourFormat) {//12 hour                
+                if (pm) {
+                    tmp |= (1 << 5);
+                }
+                WriteI2C(tmp);
+            } else {
+                WriteI2C(tmp);
+            }
+            data[RTC_DS1307_TIME_ARRAY_HR] = tmp;
+        } else {
+            WriteI2C(data[i]);
+        }
+    }
+    CloseI2C();
+    IdleI2C();
+}
 
-//void rtc_DS1307_setSQW(char addr_i2c, char config);
+void rtc_DS1307_writeTime(char addr_i2c, char* time, char hourFormat, char pm) {
+    char i = 0;
+    char tmp = 0;
+    StartI2C();
+    IdleI2C();
+    WriteI2C(addr_i2c);
+    WriteI2C(RTC_DS1307_REGISTER_SEC);
+    for (i = 0; i < RTC_DS1307_TIME_ARRAY_SIZE; i++) {
+        if (i == RTC_DS1307_TIME_ARRAY_SEC) {
+            WriteI2C(rtc_DS1307_binary_to_BCD(time[RTC_DS1307_TIME_ARRAY_SEC]));
+        } else if (i == RTC_DS1307_TIME_ARRAY_HR) {
+            tmp = rtc_DS1307_binary_to_BCD(time[RTC_DS1307_TIME_ARRAY_HR]);
+            if (hourFormat) {//12 hour                
+                if (pm) {
+                    tmp |= (1 << 5);
+                }
+                WriteI2C(tmp);
+            } else {
+                WriteI2C(tmp);
+            }
+            time[RTC_DS1307_TIME_ARRAY_HR] = tmp;
+        } else {
+            WriteI2C(time[i]);
+        }
+    }
+    CloseI2C();
+    IdleI2C();
+}
+
+void rtc_DS1307_writeDate(char addr_i2c, char* date) {
+    char i = 0;
+    StartI2C();
+    IdleI2C();
+    WriteI2C(addr_i2c);
+    WriteI2C(RTC_DS1307_REGISTER_DATE);
+    for (i = 0; i < RTC_DS1307_DATE_ARRAY_SIZE; i++) {
+        WriteI2C(date[i]);
+    }
+    CloseI2C();
+    IdleI2C();
+}
+
