@@ -98,5 +98,3 @@ char getch() {
 char getche() {
     return (getch());
 }
-
-//t
