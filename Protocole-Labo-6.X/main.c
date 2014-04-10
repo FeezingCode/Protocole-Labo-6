@@ -17,7 +17,7 @@
 #include <xc.h>
 #include <plib/i2c.h>
 #include <stdio.h>
-#include <stdlib.h>    
+#include <stdlib.h>
 #include "rtc_DS1307.h"
 #include "sensor_distance_SRF02.h"
 
@@ -27,6 +27,8 @@
 void putch(char data); // Pour utiliser printf sur RS232
 char getch(); // Pour utiliser sur RS232
 char getche(); // Pour utiliser gets sur RS232
+char getData(char* buffer, char min, char max, char* invalidData);
+char* fgets(char* str, int num);
 
 int main(int argc, char** argv) {
     char buffer[BUFFER_SIZE] = {0};
@@ -60,23 +62,29 @@ int main(int argc, char** argv) {
             // Recuperer les informations puis les formater et les mettre a la bonne place dans le tableau "ds1307" - xtoi() peut etre tres utile
             // Attention aux bits speciaux du registre (CH, mode 24h...)
             printf("\n\rAnnee (XX)? ");
-            gets(buffer);
-            //? ? ?
+            fgets(buffer, BUFFER_SIZE, stdin);
+            getData(buffer, 0, 99, invalidData);
+
             printf("Mois (XX)? ");
-            gets(buffer);
-            //? ? ?
-            //printf("Date (XX)? ");
-            //gets(rep);
-            //? ? ?
-            //printf("Jour de semaine 1-7 ? ");
-            //gets(rep);
-            //? ? ?
-            //printf("\n\rHeure 0-23 (XX)? ");
-            //gets(rep);
-            //? ? ?
-            //printf("Minutes 0-59 (XX)? ");
-            //gets(rep);
-            //? ? ?
+            fgets(buffer, BUFFER_SIZE, stdin);
+            getData(buffer, 1, 12, invalidData);
+
+            printf("Date (XX)? ");
+            fgets(buffer, BUFFER_SIZE, stdin);
+            getData(buffer, 1, 31, invalidData);
+
+            printf("Jour de semaine 1-7 ? ");
+            fgets(buffer, BUFFER_SIZE, stdin);
+            getData(buffer, 1, 7, invalidData);
+
+            printf("\n\rHeure 0-23 (XX)? ");
+            fgets(buffer, BUFFER_SIZE, stdin);
+            getData(buffer, 0, 23, invalidData);
+
+            printf("Minutes 0-59 (XX)? ");
+            fgets(buffer, BUFFER_SIZE, stdin);
+            getData(buffer, 0, 59, invalidData);
+
             ds1307_tmp_data[RTC_DS1307_REGISTER_SEC] = 0; // registre des secondes: remettre les secondes a 0 plutot que de demander a l'usager
             if (invalidData) {
                 printf("\r\nCertaines donnees sont invalides\r\n");
@@ -122,4 +130,45 @@ char getch() {
 
 char getche() {
     return (getch());
+}
+
+char getData(char* buffer, char min, char max, char* invalidData) {
+    long tmp = 0;
+    char isNumber = 0;
+    tmp = strtol(buffer, isNumber, 0);
+    if (isNumber) {
+        if (tmp < min || tmp > max) {
+            *invalidData = 1;
+        }
+    } else {
+        *invalidData = 1;
+    }
+    return (char) tmp;
+}
+
+char* fgets(char* str, int num) {
+    int i;
+    int c;
+    int done = 0;
+    if (str == 0 || num <= 0) {
+        return 0;
+    }
+    for (i = 0; !done && i < num - 1; i++) {
+        c = getc();
+        if (c == EOF) {
+            done = 1;
+            i--;
+        } else {
+            str[i] = c;
+            if (c == '\n') {
+                done = 1;
+            }
+        }
+    }
+    str[i] = '\0';
+    if (i == 0) {
+        return 0;
+    } else {
+        return str;
+    }
 }
