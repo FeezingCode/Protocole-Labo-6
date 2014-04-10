@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
     OpenUSART(RS232_CONFIG, RS232_PBRG); //9600 BAUD, rs232
     OpenI2C(MASTER, SLEW_ON);
 
-    //printf("\n\rLabo I2C: Appareil de mesure de distances\n\r");
+    printf("\n\rLabo I2C: Appareil de mesure de distances\n\r");
 
     // ---------- Affichage du temps du DS1307 sur terminal ---------------
     //lecture_ds1307(ds1307);
