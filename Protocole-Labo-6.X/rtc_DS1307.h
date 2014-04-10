@@ -44,18 +44,18 @@ extern "C" {
     char rtc_DS1307_BCD_to_binary(char bcd);
     char rtc_DS1307_binary_to_BCD(char binary);
 
-    char rtc_DS1307_readDateTime(char addr_i2c, char* data);
-    char rtc_DS1307_readTime(char addr_i2c, char* time);
-    void rtc_DS1307_readDate(char addr_i2c, char* date);
+    char rtc_DS1307_readDateTime(char* data);
+    char rtc_DS1307_readTime(char* time);
+    void rtc_DS1307_readDate(char* date);
 
-    void rtc_DS1307_writeDateTime(char addr_i2c, char* data, char hourFormat, char pm);
-    void rtc_DS1307_writeTime(char addr_i2c, char* time, char hourFormat, char pm);
-    void rtc_DS1307_writeDate(char addr_i2c, char* date);
+    void rtc_DS1307_writeDateTime(char* data, char hourFormat, char pm);
+    void rtc_DS1307_writeTime(char* time, char hourFormat, char pm);
+    void rtc_DS1307_writeDate(char* date);
 
-    void rtc_DS1307_setSQW(char addr_i2c, char config);
+    void rtc_DS1307_setSQW(char config);
 
-    char rtc_DS1307_readRAM(char addr_i2c, char addr_data);
-    void rtc_DS1307_writeRAM(char addr_i2c, char addr_data, char data);
+    char rtc_DS1307_readRAM(char addr_data);
+    void rtc_DS1307_writeRAM(char addr_data, char data);
 
 #ifdef	__cplusplus
 }
