@@ -30,6 +30,11 @@ char getche(); // Pour utiliser gets sur RS232
 char getData(char* buffer, char min, char max, char* invalidData);
 char* fgets(char* str, int num);
 
+char downloadButtonFlag = 0;
+char takeMesureButtonFlag = 0;
+
+void interrupt ISR();
+
 int main(int argc, char** argv) {
     char buffer[BUFFER_SIZE] = {0};
     char ds1307_data[RTC_DS1307_DATE_TIME_ARRAY_SIZE]; // registres 0 a 6 du ds1307
@@ -39,9 +44,12 @@ int main(int argc, char** argv) {
     char user_input = 0;
     char invalidData = 0;
     int i = 0;
-
     OSCCON = 0b01110010;
     ADCON1 = 0xff;
+    INTCON |= (1<<7) | (1<<4) | (1<<5);
+    INTCON2 &= ~((1<<6) | (1<<5));
+    INTCON3 &= (1<<3);
+    RCON &= ~(1<<7);
     OpenUSART(RS232_CONFIG, RS232_PBRG); //9600 BAUD, rs232
     OpenI2C(MASTER, SLEW_ON);
 
@@ -173,6 +181,16 @@ char* fgets(char* str, int num) {
     }
 }
 
-
-//bob avec chevelure
-
+void interrupt ISR(){
+    if(INTCON & (1<<2)){//Timer 0
+        INTCON &= ~(1<<2);
+    }
+    if(INTCON & (1<<1)){//INT0
+        INTCON &= ~(1<<1);
+        takeMesureButtonFlag = 1;
+    }
+    if(INTCON3 & (1<<0)){//INT1
+        INTCON3 &= ~(1<<0);
+        downloadButtonFlag = 1;
+    }
+}
