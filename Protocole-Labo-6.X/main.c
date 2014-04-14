@@ -174,5 +174,5 @@ char* fgets(char* str, int num) {
 }
 
 
-//bob avec cheveeleyr
+//bob avec chevelure
 
