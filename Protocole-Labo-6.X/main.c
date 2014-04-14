@@ -62,27 +62,27 @@ int main(int argc, char** argv) {
             // Recuperer les informations puis les formater et les mettre a la bonne place dans le tableau "ds1307" - xtoi() peut etre tres utile
             // Attention aux bits speciaux du registre (CH, mode 24h...)
             printf("\n\rAnnee (XX)? ");
-            fgets(buffer, BUFFER_SIZE, stdin);
+            fgets(buffer, BUFFER_SIZE);
             getData(buffer, 0, 99, invalidData);
 
             printf("Mois (XX)? ");
-            fgets(buffer, BUFFER_SIZE, stdin);
+            fgets(buffer, BUFFER_SIZE);
             getData(buffer, 1, 12, invalidData);
 
             printf("Date (XX)? ");
-            fgets(buffer, BUFFER_SIZE, stdin);
+            fgets(buffer, BUFFER_SIZE);
             getData(buffer, 1, 31, invalidData);
 
             printf("Jour de semaine 1-7 ? ");
-            fgets(buffer, BUFFER_SIZE, stdin);
+            fgets(buffer, BUFFER_SIZE);
             getData(buffer, 1, 7, invalidData);
 
             printf("\n\rHeure 0-23 (XX)? ");
-            fgets(buffer, BUFFER_SIZE, stdin);
+            fgets(buffer, BUFFER_SIZE);
             getData(buffer, 0, 23, invalidData);
 
             printf("Minutes 0-59 (XX)? ");
-            fgets(buffer, BUFFER_SIZE, stdin);
+            fgets(buffer, BUFFER_SIZE);
             getData(buffer, 0, 59, invalidData);
 
             ds1307_tmp_data[RTC_DS1307_REGISTER_SEC] = 0; // registre des secondes: remettre les secondes a 0 plutot que de demander a l'usager
