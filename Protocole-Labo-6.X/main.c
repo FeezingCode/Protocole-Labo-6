@@ -8,7 +8,7 @@
 #define USE_OR_MASKS
 #define _XTAL_FREQ      8000000
 #define BUFFER_SIZE     20
-#define DOWNLOAD_BUTTON PORTBbits.RB4
+#define UPLOAD_BUTTON PORTBbits.RB4
 #define MESURE_BUTTON   PORTBbits.RB3
 #define RS232_CONFIG    USART_TX_INT_OFF | USART_RX_INT_OFF | USART_ASYNCH_MODE\
              | USART_EIGHT_BIT | USART_CONT_RX | USART_BRGH_LOW
@@ -30,8 +30,11 @@ char getche(); // Pour utiliser gets sur RS232
 char getData(char* buffer, char min, char max, char* invalidData);
 char* fgets(char* str, int num);
 
-char downloadButtonFlag = 0;
-char takeMesureButtonFlag = 0;
+char uploadButtonFlag = 0;
+char mesureButtonFlag = 0;
+char distanceSensorReadyFlag = 0;
+char distanceSensorStartFlag = 0;
+char distanceSensorCounter = 0;
 
 void interrupt ISR();
 
@@ -46,6 +49,7 @@ int main(int argc, char** argv) {
     int i = 0;
     OSCCON = 0b01110010;
     ADCON1 = 0xff;
+    T0CON = 0b11000001;
     INTCON |= (1<<7) | (1<<4) | (1<<5);
     INTCON2 &= ~((1<<6) | (1<<5));
     INTCON3 &= (1<<3);
@@ -121,6 +125,13 @@ int main(int argc, char** argv) {
     printf("\r\nPret pour mesurer!\r\n");
 
     while (1) {
+        if(uploadButtonFlag){
+            uploadButtonFlag = 0;
+
+        }
+        if(mesureButtonFlag){
+            mesureButtonFlag = 0;
+        }
         //		Contenu des seances du 18 et 25 mars
     }
     return (EXIT_SUCCESS);
@@ -184,13 +195,23 @@ char* fgets(char* str, int num) {
 void interrupt ISR(){
     if(INTCON & (1<<2)){//Timer 0
         INTCON &= ~(1<<2);
+        if(distanceSensorCounter > 0){//Count approximately 74,752 ms
+            distanceSensorCounter--;
+            if(distanceSensorCounter == 0){
+                distanceSensorReadyFlag = 1;
+            }
+        }
+        if(distanceSensorStartFlag){
+            distanceSensorStartFlag = 0;
+            distanceSensorCounter = 146;
+        }
     }
     if(INTCON & (1<<1)){//INT0
         INTCON &= ~(1<<1);
-        takeMesureButtonFlag = 1;
+        mesureButtonFlag = 1;
     }
     if(INTCON3 & (1<<0)){//INT1
         INTCON3 &= ~(1<<0);
-        downloadButtonFlag = 1;
+        uploadButtonFlag = 1;
     }
 }

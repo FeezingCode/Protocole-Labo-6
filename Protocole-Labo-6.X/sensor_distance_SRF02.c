@@ -1,6 +1,6 @@
 #include "sensor_distance_SRF02.h"
 
-void sensor_distance_SRF02_sendCommand(char addr_i2c, char command){
+void sensor_distance_SRF02_sendCommand(char addr_i2c, char command) {
     StartI2C();
     IdleI2C();
     WriteI2C(addr_i2c);
@@ -8,7 +8,8 @@ void sensor_distance_SRF02_sendCommand(char addr_i2c, char command){
     IdleI2C();
     CloseI2C();
 }
-char sensor_distance_SRF02_readSoftwareRevision(char addr_i2c){
+
+char sensor_distance_SRF02_readSoftwareRevision(char addr_i2c) {
     char revision;
     StartI2C();
     IdleI2C();
@@ -17,9 +18,10 @@ char sensor_distance_SRF02_readSoftwareRevision(char addr_i2c){
     revision = ReadI2C();
     IdleI2C();
     CloseI2C();
-    return (int)revision;
+    return (int) revision;
 }
-int sensor_distance_SRF02_readDistance(char addr_i2c){
+
+int sensor_distance_SRF02_readDistance(char addr_i2c) {
     char lsb;
     char msb;
     StartI2C();
@@ -30,5 +32,13 @@ int sensor_distance_SRF02_readDistance(char addr_i2c){
     lsb = ReadI2C();
     IdleI2C();
     CloseI2C();
-    return (int)((msb << 8) | lsb);
+    return (int) ((msb << 8) | lsb);
+}
+
+int getDistance(char addr_i2c, char *distanceSensorReadyFlag, char *distanceSensorStartFlag) {
+    sensor_distance_SRF02_sendCommand(addr_i2c, SENSOR_DISTANCE_SRF02_COMMAND_RANGE_CM);
+    *distanceSensorStartFlag = 1;
+    while (!(*distanceSensorReadyFlag));
+    distanceSensorReadyFlag = 0;
+    return sensor_distance_SRF02_readDistance(addr_i2c);
 }
