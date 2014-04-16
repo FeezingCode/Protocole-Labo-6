@@ -5,33 +5,37 @@
  * Created on 8 avril 2014, 10:55
  */
 
+#include "eeprom_24lc1025.h"
+
+
 #define USE_OR_MASKS
+
 #define _XTAL_FREQ      8000000
-#define BUFFER_SIZE     20
-#define UPLOAD_BUTTON PORTBbits.RB4
-#define MESURE_BUTTON   PORTBbits.RB3
 #define RS232_CONFIG    USART_TX_INT_OFF | USART_RX_INT_OFF | USART_ASYNCH_MODE\
              | USART_EIGHT_BIT | USART_CONT_RX | USART_BRGH_LOW
 #define RS232_PBRG      12
 
-#include <xc.h>
-#include <plib/i2c.h>
+#define SRF02_I2C_ADDR              0xE0
+#define EPPROM_24LC1025_I2C_ADDR    0x50
+
+#define UPLOAD_BUTTON               PORTBbits.RB4
+#define MESURE_BUTTON               PORTBbits.RB3
+
+#define BUFFER_SIZE                  20
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <xc.h>
+#include <plib/i2c.h>
 #include "rtc_DS1307.h"
 #include "sensor_distance_SRF02.h"
 
 #pragma config  OSC = INTIO67, BOREN = OFF, PWRT = ON
 #pragma config  WDT = OFF, DEBUG = ON, LVP = OFF
 
-void putch(char data); // Pour utiliser printf sur RS232
-char getch(); // Pour utiliser sur RS232
-char getche(); // Pour utiliser gets sur RS232
-char getData(char* buffer, char min, char max, char* invalidData);
-char* fgets(char* str, int num);
-
 char uploadButtonFlag = 0;
 char mesureButtonFlag = 0;
+char eraseButtonFlag = 0;
 char distanceSensorReadyFlag = 0;
 char distanceSensorStartFlag = 0;
 char distanceSensorCounter = 0;
@@ -43,19 +47,23 @@ int main(int argc, char** argv) {
     char ds1307_data[RTC_DS1307_DATE_TIME_ARRAY_SIZE]; // registres 0 a 6 du ds1307
     char ds1307_tmp_data[RTC_DS1307_DATE_TIME_ARRAY_SIZE];
     char weeks_day_french[7][9] = {"dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"};
-    //char weeks_day_english[7][10] = {"sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"};;
     char user_input = 0;
     char invalidData = 0;
     int i = 0;
+    int j = 0;
+    int dataCount = 0;
+    int data = 0;
+
     OSCCON = 0b01110010;
     ADCON1 = 0xff;
     T0CON = 0b11000001;
-    INTCON |= (1<<7) | (1<<4) | (1<<5);
-    INTCON2 &= ~((1<<6) | (1<<5));
-    INTCON3 &= (1<<3);
-    RCON &= ~(1<<7);
+    INTCON |= (1 << 7) | (1 << 4) | (1 << 5);
+    INTCON2 &= ~((1 << 6) | (1 << 5) | (1 << 4));
+    INTCON3 &= (1 << 3) | (1 << 4);
+    RCON &= ~(1 << 7);
     OpenUSART(RS232_CONFIG, RS232_PBRG); //9600 BAUD, rs232
     OpenI2C(MASTER, SLEW_ON);
+    SSPADD = 0x13;//SSPAD = Fosc/(4*Fscl)-1, 100 khz
 
     printf("\n\rLabo I2C: Appareil de mesure de distances\n\r");
     rtc_DS1307_readDateTime(ds1307_data);
@@ -123,95 +131,67 @@ int main(int argc, char** argv) {
         }
     } while (invalidData);
     printf("\r\nPret pour mesurer!\r\n");
-
+    dataCount = eeprom_24lc1025_read(EPPROM_24LC1025_I2C_ADDR, 0);
     while (1) {
-        if(uploadButtonFlag){
+        if (uploadButtonFlag) {
             uploadButtonFlag = 0;
-
+            for (i = 0; i < dataCount; i++) {
+                eeprom_24lc1025_readArray(EPPROM_24LC1025_I2C_ADDR, 1 + i * 9, buffer, 9);
+                data = (int) buffer[0] << 8 | (int) buffer[1];
+                for (j = 0; j < RTC_DS1307_DATE_TIME_ARRAY_SIZE; j++) {
+                     ds1307_data[i] = buffer[j + 2];
+                }
+                printf("")
+            }
         }
-        if(mesureButtonFlag){
+        if (mesureButtonFlag) {
             mesureButtonFlag = 0;
+            data = sensor_distance_SRF02_getDistance(SRF02_I2C_ADDR, &distanceSensorReadyFlag,
+                    &distanceSensorStartFlag);
+            rtc_DS1307_readDateTime(ds1307_data);
+            buffer[0] = data >> 8;
+            buffer[1] = 0x00ff & data;
+            for (i = 0; i < RTC_DS1307_DATE_TIME_ARRAY_SIZE; i++) {
+                buffer[i + 2] = ds1307_data[i];
+            }
+            dataCount++;
+            eeprom_24lc1025_write(EPPROM_24LC1025_I2C_ADDR, 0, dataCount);
+            eeprom_24lc1025_writeArray(EPPROM_24LC1025_I2C_ADDR, 1 + dataCount * 9, buffer, 9);
+        }
+        if (eraseButtonFlag) {
+            eraseButtonFlag = 0;
+            dataCount = 0;
+            eeprom_24lc1025_write(EPPROM_24LC1025_I2C_ADDR, 0, 0);
         }
         //		Contenu des seances du 18 et 25 mars
     }
     return (EXIT_SUCCESS);
 }
 
-void putch(char data) {
-    while (!TXIF);
-    TXREG = data;
-}
-
-char getch() {
-    while (!RCIF);
-    return (RCREG);
-}
-
-char getche() {
-    return (getch());
-}
-
-char getData(char* buffer, char min, char max, char* invalidData) {
-    long tmp = 0;
-    char isNumber = 0;
-    tmp = strtol(buffer, isNumber, 0);
-    if (isNumber) {
-        if (tmp < min || tmp > max) {
-            *invalidData = 1;
-        }
-    } else {
-        *invalidData = 1;
-    }
-    return (char) tmp;
-}
-
-char* fgets(char* str, int num) {
-    int i;
-    int c;
-    int done = 0;
-    if (str == 0 || num <= 0) {
-        return 0;
-    }
-    for (i = 0; !done && i < num - 1; i++) {
-        c = getc();
-        if (c == EOF) {
-            done = 1;
-            i--;
-        } else {
-            str[i] = c;
-            if (c == '\n') {
-                done = 1;
-            }
-        }
-    }
-    str[i] = '\0';
-    if (i == 0) {
-        return 0;
-    } else {
-        return str;
-    }
-}
-
-void interrupt ISR(){
-    if(INTCON & (1<<2)){//Timer 0
-        INTCON &= ~(1<<2);
-        if(distanceSensorCounter > 0){//Count approximately 74,752 ms
+void interrupt ISR() {
+    if (INTCON & (1 << 2)) {//Timer 0
+        INTCON &= ~(1 << 2);
+        if (distanceSensorCounter > 0) {//Count approximately 74,752 ms
             distanceSensorCounter--;
-            if(distanceSensorCounter == 0){
+            if (distanceSensorCounter == 0) {
                 distanceSensorReadyFlag = 1;
             }
         }
-        if(distanceSensorStartFlag){
+        if (distanceSensorStartFlag) {
             distanceSensorStartFlag = 0;
             distanceSensorCounter = 146;
         }
     }
-    if(INTCON & (1<<1)){//INT0
-        INTCON &= ~(1<<1);
+    if (INTCON & (1 << 1)) {//INT0
+        INTCON &= ~(1 << 1);
         mesureButtonFlag = 1;
     }
-    if(INTCON3 & (1<<0)){//INT1
-        INTCON3 &= ~(1<<0);
+    if (INTCON3 & (1 << 0)) {//INT1
+        INTCON3 &= ~(1 << 0);
         uploadButtonFlag = 1;
+    }
+    if (INTCON3 & (1 << 1)) {//INT2
+        INTCON3 &= ~(1 << 1);
+        eraseButtonFlag = 1;
     }
 }

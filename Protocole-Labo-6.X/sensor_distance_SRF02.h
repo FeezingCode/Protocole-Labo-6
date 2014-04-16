@@ -29,7 +29,7 @@ extern "C" {
     void sensor_distance_SRF02_sendCommand(char addr_i2c, char command);
     char sensor_distance_SRF02_readSoftwareRevision(char addr_i2c);
     int sensor_distance_SRF02_readDistance(char addr_i2c);
-    int getDistance(char addr_i2c, char *distanceSensorReadyFlag, char *distanceSensorStartFlag);
+    int sensor_distance_SRF02_getDistance(char addr_i2c, char *distanceSensorReadyFlag, char *distanceSensorStartFlag);
 
 #ifdef	__cplusplus
 }
