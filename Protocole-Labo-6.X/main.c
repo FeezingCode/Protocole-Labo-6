@@ -141,7 +141,7 @@ int main(int argc, char** argv) {
                 for (j = 0; j < RTC_DS1307_DATE_TIME_ARRAY_SIZE; j++) {
                      ds1307_data[i] = buffer[j + 2];
                 }
-                printf("")
+                printf("");
             }
         }
         if (mesureButtonFlag) {
@@ -149,8 +149,8 @@ int main(int argc, char** argv) {
             data = sensor_distance_SRF02_getDistance(SRF02_I2C_ADDR, &distanceSensorReadyFlag,
                     &distanceSensorStartFlag);
             rtc_DS1307_readDateTime(ds1307_data);
-            buffer[0] = data >> 8;
-            buffer[1] = 0x00ff & data;
+            buffer[0] = (char)(data >> 8);
+            buffer[1] = (char)(0x00ff & data);
             for (i = 0; i < RTC_DS1307_DATE_TIME_ARRAY_SIZE; i++) {
                 buffer[i + 2] = ds1307_data[i];
             }
