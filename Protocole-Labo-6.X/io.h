@@ -17,7 +17,8 @@ extern "C" {
 void putch(char data); // Pour utiliser printf sur RS232
 char getch(); // Pour utiliser sur RS232
 char getche(); // Pour utiliser gets sur RS232
-char getData(char* buffer, char min, char max, char* invalidData);
+char getData(char* message, char* buffer, int buffer_size, char min, char max);
+char extractData(char* buffer, char min, char max, char* invalidData);
 char* fgets(char* str, int num);
 
 
