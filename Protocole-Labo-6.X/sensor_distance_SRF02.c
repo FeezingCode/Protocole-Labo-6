@@ -3,7 +3,7 @@
 void sensor_distance_SRF02_sendCommand(char addr_i2c, char command) {
     StartI2C();
     IdleI2C();
-    WriteI2C(addr_i2c | 0x01);
+    WriteI2C(addr_i2c);
     WriteI2C(SENSOR_DISTANCE_SRF02_REGISTER_COMMAND);
     WriteI2C(command);
     CloseI2C();
@@ -14,7 +14,7 @@ char sensor_distance_SRF02_readSoftwareRevision(char addr_i2c) {
     char revision;
     StartI2C();
     IdleI2C();
-    WriteI2C(addr_i2c);
+    WriteI2C(addr_i2c | 0x01);
     WriteI2C(SENSOR_DISTANCE_SRF02_REGISTER_REVISION);
     revision = ReadI2C();
     CloseI2C();
@@ -27,7 +27,7 @@ int sensor_distance_SRF02_readDistance(char addr_i2c) {
     char msb;
     StartI2C();
     IdleI2C();
-    WriteI2C(addr_i2c);
+    WriteI2C(addr_i2c | 0x01);
     WriteI2C(SENSOR_DISTANCE_SRF02_REGISTER_RANGE_MSB);
     msb = ReadI2C();
     lsb = ReadI2C();

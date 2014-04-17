@@ -17,7 +17,7 @@ char rtc_DS1307_readDateTime(char* data) {
     char hourFormat = 0;
     StartI2C();
     IdleI2C();
-    WriteI2C(RTC_DS1307_TIME_I2C_ADDR);
+    WriteI2C(RTC_DS1307_TIME_I2C_ADDR | 0x01);
     WriteI2C(RTC_DS1307_REGISTER_SEC);
     for (i = 0; i < RTC_DS1307_DATE_TIME_ARRAY_SIZE; i++) {
         if (i == RTC_DS1307_TIME_ARRAY_SEC) {
@@ -48,7 +48,7 @@ char rtc_DS1307_readTime(char* time) {
     char hourFormat;
     StartI2C();
     IdleI2C();
-    WriteI2C(RTC_DS1307_TIME_I2C_ADDR);
+    WriteI2C(RTC_DS1307_TIME_I2C_ADDR | 0x01);
     WriteI2C(RTC_DS1307_REGISTER_SEC);
     for (i = 0; i < RTC_DS1307_TIME_ARRAY_SIZE; i++) {
         if (i == RTC_DS1307_TIME_ARRAY_SEC) {
@@ -77,7 +77,7 @@ void rtc_DS1307_readDate(char* date) {
     char i = 0;
     StartI2C();
     IdleI2C();
-    WriteI2C(RTC_DS1307_TIME_I2C_ADDR);
+    WriteI2C(RTC_DS1307_TIME_I2C_ADDR | 0x01);
     WriteI2C(RTC_DS1307_REGISTER_DAY);
     for (i = 0; i < RTC_DS1307_DATE_ARRAY_SIZE; i++) {
         date[i] = rtc_DS1307_BCD_to_binary(ReadI2C());
@@ -92,7 +92,7 @@ void rtc_DS1307_writeDateTime(char* data, char hourFormat, char pm) {
     char tmp = 0;
     StartI2C();
     IdleI2C();
-    WriteI2C(RTC_DS1307_TIME_I2C_ADDR | 0x01);
+    WriteI2C(RTC_DS1307_TIME_I2C_ADDR);
     WriteI2C(RTC_DS1307_REGISTER_SEC);
     for (i = 0; i < RTC_DS1307_DATE_TIME_ARRAY_SIZE; i++) {
         if (i == RTC_DS1307_TIME_ARRAY_SEC) {
@@ -121,7 +121,7 @@ void rtc_DS1307_writeTime(char* time, char hourFormat, char pm) {
     char tmp = 0;
     StartI2C();
     IdleI2C();
-    WriteI2C(RTC_DS1307_TIME_I2C_ADDR | 0x01);
+    WriteI2C(RTC_DS1307_TIME_I2C_ADDR);
     WriteI2C(RTC_DS1307_REGISTER_SEC);
     for (i = 0; i < RTC_DS1307_TIME_ARRAY_SIZE; i++) {
         if (i == RTC_DS1307_TIME_ARRAY_SEC) {
@@ -149,7 +149,7 @@ void rtc_DS1307_writeDate(char* date) {
     char i = 0;
     StartI2C();
     IdleI2C();
-    WriteI2C(RTC_DS1307_TIME_I2C_ADDR | 0x01);
+    WriteI2C(RTC_DS1307_TIME_I2C_ADDR);
     WriteI2C(RTC_DS1307_REGISTER_DATE);
     for (i = 0; i < RTC_DS1307_DATE_ARRAY_SIZE; i++) {
         WriteI2C(date[i]);
