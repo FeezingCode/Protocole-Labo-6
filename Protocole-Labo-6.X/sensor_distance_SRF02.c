@@ -44,9 +44,11 @@ int sensor_distance_SRF02_readDistance(char addr_i2c) {
 }
 
 int sensor_distance_SRF02_getDistance(char addr_i2c, char *distanceSensorReadyFlag, char *distanceSensorStartFlag) {
+    OpenI2C(MASTER, SLEW_OFF);
     sensor_distance_SRF02_sendCommand(addr_i2c, SENSOR_DISTANCE_SRF02_COMMAND_RANGE_CM);
     *distanceSensorStartFlag = 1;
     while (!(*distanceSensorReadyFlag));
     distanceSensorReadyFlag = 0;
+    OpenI2C(MASTER, SLEW_OFF);
     return sensor_distance_SRF02_readDistance(addr_i2c);
 }
