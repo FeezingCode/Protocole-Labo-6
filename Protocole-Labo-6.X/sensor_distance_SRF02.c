@@ -19,6 +19,7 @@ char sensor_distance_SRF02_readSoftwareRevision(char addr_i2c) {
     RestartI2C();
     WriteI2C(addr_i2c | 0x01);
     revision = ReadI2C();
+    NotAckI2C();
     CloseI2C();
     IdleI2C();
     return (int) revision;
@@ -34,7 +35,9 @@ int sensor_distance_SRF02_readDistance(char addr_i2c) {
     RestartI2C();
     WriteI2C(addr_i2c | 0x01);
     msb = ReadI2C();
+    AckI2C();
     lsb = ReadI2C();
+    NotAckI2C();
     CloseI2C();
     IdleI2C();
     return (int) ((msb << 8) | lsb);

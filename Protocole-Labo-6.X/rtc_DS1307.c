@@ -20,7 +20,6 @@ char rtc_DS1307_readDateTime(char* data) {
     WriteI2C(RTC_DS1307_TIME_I2C_ADDR);
     WriteI2C(RTC_DS1307_REGISTER_SEC);
     RestartI2C();
-    IdleI2C();
     WriteI2C(RTC_DS1307_TIME_I2C_ADDR | 0x01);
     for (i = 0; i < RTC_DS1307_DATE_TIME_ARRAY_SIZE; i++) {
         if (i == RTC_DS1307_TIME_ARRAY_SEC) {
@@ -38,6 +37,11 @@ char rtc_DS1307_readDateTime(char* data) {
             data[RTC_DS1307_TIME_ARRAY_HR] = tmp;
         } else {
             data[i] = rtc_DS1307_BCD_to_binary(ReadI2C());
+        }
+        if (i < RTC_DS1307_DATE_TIME_ARRAY_SIZE - 1) {
+            AckI2C();
+        } else {
+            NotAckI2C();
         }
     }
     CloseI2C();
@@ -72,6 +76,11 @@ char rtc_DS1307_readTime(char* time) {
         } else {
             time[i] = rtc_DS1307_BCD_to_binary(ReadI2C());
         }
+        if (i < RTC_DS1307_TIME_ARRAY_SIZE - 1) {
+            AckI2C();
+        } else {
+            NotAckI2C();
+        }
     }
     CloseI2C();
     IdleI2C();
@@ -88,6 +97,11 @@ void rtc_DS1307_readDate(char* date) {
     WriteI2C(RTC_DS1307_TIME_I2C_ADDR | 0x01);
     for (i = 0; i < RTC_DS1307_DATE_ARRAY_SIZE; i++) {
         date[i] = rtc_DS1307_BCD_to_binary(ReadI2C());
+        if (i < RTC_DS1307_DATE_ARRAY_SIZE - 1) {
+            AckI2C();
+        } else {
+            NotAckI2C();
+        }
     }
     CloseI2C();
     IdleI2C();

@@ -35,6 +35,7 @@ char eeprom_24lc1025_read(char addr_i2c, int addr) {
     RestartI2C();
     WriteI2C(addr_i2c | 0x01);
     data = ReadI2C();
+    NotAckI2C();
     CloseI2C();
     IdleI2C();
     return data;
@@ -51,6 +52,11 @@ void eeprom_24lc1025_readArray(char addr_i2c, int addr, char *data, char size) {
     WriteI2C(addr_i2c | 0x01);
     for (i = 0; i < size; i++) {
         data[i] = ReadI2C();
+        if (i < size - 1) {
+            AckI2C();
+        } else {
+            NotAckI2C();
+        }
     }
     CloseI2C();
     IdleI2C();
