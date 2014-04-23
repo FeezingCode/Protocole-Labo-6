@@ -61,8 +61,9 @@ int main(int argc, char** argv) {
     INTCON2 &= ~((1 << 6) | (1 << 5) | (1 << 4));
     INTCON3 &= (1 << 3) | (1 << 4);
     RCON &= ~(1 << 7);
+    CloseI2C();
     OpenUSART(RS232_CONFIG, RS232_PBRG); //9600 BAUD, rs232
-    OpenI2C(MASTER, SLEW_ON);
+    OpenI2C(MASTER, SLEW_OFF);
     SSPADD = 0x13; //SSPAD = Fosc/(4*Fscl)-1, 100 khz
 
     printf("\n\rLabo I2C: Appareil de mesure de distances\n\r");

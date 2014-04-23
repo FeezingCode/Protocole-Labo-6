@@ -1,13 +1,13 @@
 #include "rtc_DS1307.h"
 
 char rtc_DS1307_BCD_to_binary(char bcd) {
-    return (bcd>>4)*10 + (bcd&0xF0);
+    return (bcd >> 4)*10 + (bcd & 0xF0);
 }
 
 char rtc_DS1307_binary_to_BCD(char binary) {
-    char bcd = binary%10;
+    char bcd = binary % 10;
     binary /= 10;
-    bcd |= (binary<<4);
+    bcd |= (binary << 4);
     return bcd;
 }
 
@@ -17,8 +17,11 @@ char rtc_DS1307_readDateTime(char* data) {
     char hourFormat = 0;
     StartI2C();
     IdleI2C();
-    WriteI2C(RTC_DS1307_TIME_I2C_ADDR | 0x01);
+    WriteI2C(RTC_DS1307_TIME_I2C_ADDR);
     WriteI2C(RTC_DS1307_REGISTER_SEC);
+    RestartI2C();
+    IdleI2C();
+    WriteI2C(RTC_DS1307_TIME_I2C_ADDR | 0x01);
     for (i = 0; i < RTC_DS1307_DATE_TIME_ARRAY_SIZE; i++) {
         if (i == RTC_DS1307_TIME_ARRAY_SEC) {
             data[RTC_DS1307_TIME_ARRAY_SEC] =
@@ -48,8 +51,10 @@ char rtc_DS1307_readTime(char* time) {
     char hourFormat;
     StartI2C();
     IdleI2C();
-    WriteI2C(RTC_DS1307_TIME_I2C_ADDR | 0x01);
+    WriteI2C(RTC_DS1307_TIME_I2C_ADDR);
     WriteI2C(RTC_DS1307_REGISTER_SEC);
+    RestartI2C();
+    WriteI2C(RTC_DS1307_TIME_I2C_ADDR | 0x01);
     for (i = 0; i < RTC_DS1307_TIME_ARRAY_SIZE; i++) {
         if (i == RTC_DS1307_TIME_ARRAY_SEC) {
             time[RTC_DS1307_TIME_ARRAY_SEC] =
@@ -77,8 +82,10 @@ void rtc_DS1307_readDate(char* date) {
     char i = 0;
     StartI2C();
     IdleI2C();
-    WriteI2C(RTC_DS1307_TIME_I2C_ADDR | 0x01);
+    WriteI2C(RTC_DS1307_TIME_I2C_ADDR);
     WriteI2C(RTC_DS1307_REGISTER_DAY);
+    RestartI2C();
+    WriteI2C(RTC_DS1307_TIME_I2C_ADDR | 0x01);
     for (i = 0; i < RTC_DS1307_DATE_ARRAY_SIZE; i++) {
         date[i] = rtc_DS1307_BCD_to_binary(ReadI2C());
     }
