@@ -111,12 +111,8 @@ int main(int argc, char** argv) {
             uploadButtonFlag = 0;
             for (i = 0; i < dataCount; i++) {
                 eeprom_24lc1025_readArray(EPPROM_24LC1025_I2C_ADDR, 1 + i * 9, buffer, 9);
-<<<<<<< HEAD
                 data = ((int) buffer[0]) << 8 | (int) buffer[1];
-=======
-                data = ((int) buffer[0] << 8 )| (int) buffer[1];
->>>>>>> 4b74809f4d9dfd0bb23c30521d8055b6d781eba3
-                for (j = 0; j < RTC_DS1307_DATE_TIME_ARRAY_SIZE; j++) {
+                for (j = 0; j < RTC_DS1307_DATE_TIME_ARRAY_SIZE; j++){
                     ds1307_data[j] = buffer[j + 2];
                 }
                 printf("\r\nMesure #%d : %d cm (%d:%d, %d-%d-%d)", i, data,
