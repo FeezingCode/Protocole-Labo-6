@@ -16,7 +16,7 @@
 #define RS232_PBRG      12
 
 #define SRF02_I2C_ADDR              0xE0
-#define EPPROM_24LC1025_I2C_ADDR    0x50
+#define EPPROM_24LC1025_I2C_ADDR    0xA0
 
 #define BUFFER_SIZE                  20
 
@@ -47,9 +47,9 @@ int main(int argc, char** argv) {
     char weeks_day_french[7][9] = {"Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"};
     char user_input = 0;
     int i = 0;
-    int j = 0;
-    int dataCount = 0;
+    int j = 0;   
     int data = 0;
+    unsigned char dataCount = 0;
 
     OSCCON = 0b01110010;
     ADCON1 = 0xff;
@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
             for (i = 0; i < dataCount; i++) {
                 OpenI2C(MASTER, SLEW_OFF);
                 eeprom_24lc1025_readArray(EPPROM_24LC1025_I2C_ADDR, 1 + i * 9, buffer, 9);
-                data = (int) buffer[0] << 8 | (int) buffer[1];
+                data = ((int) buffer[0] << 8 )| (int) buffer[1];
                 for (j = 0; j < RTC_DS1307_DATE_TIME_ARRAY_SIZE; j++) {
                     ds1307_data[i] = buffer[j + 2];
                 }
@@ -132,12 +132,12 @@ int main(int argc, char** argv) {
             buffer[1] = (char) (0x00ff & data);
             for (i = 0; i < RTC_DS1307_DATE_TIME_ARRAY_SIZE; i++) {
                 buffer[i + 2] = ds1307_data[i];
-            }
-            dataCount++;
+            }            
             OpenI2C(MASTER, SLEW_OFF);
             eeprom_24lc1025_write(EPPROM_24LC1025_I2C_ADDR, 0, dataCount);
             OpenI2C(MASTER, SLEW_OFF);
             eeprom_24lc1025_writeArray(EPPROM_24LC1025_I2C_ADDR, 1 + dataCount * 9, buffer, 9);
+            dataCount++;
         }
         if (eraseButtonFlag) {
             eraseButtonFlag = 0;
