@@ -45,7 +45,7 @@ char rtc_DS1307_readDateTime(char* data) {
             NotAckI2C();
         }
     }
-    CloseI2C();
+    StopI2C();
     IdleI2C();
     return hourFormat;
 }
@@ -83,7 +83,7 @@ char rtc_DS1307_readTime(char* time) {
             NotAckI2C();
         }
     }
-    CloseI2C();
+    StopI2C();
     IdleI2C();
     return hourFormat;
 }
@@ -104,7 +104,7 @@ void rtc_DS1307_readDate(char* date) {
             NotAckI2C();
         }
     }
-    CloseI2C();
+    StopI2C();
     IdleI2C();
     return;
 }
@@ -133,7 +133,7 @@ void rtc_DS1307_writeDateTime(char* data, char hourFormat, char pm) {
             WriteI2C(rtc_DS1307_binary_to_BCD(data[i]));
         }
     }
-    CloseI2C();
+    StopI2C();
     IdleI2C();
 }
 
@@ -162,7 +162,7 @@ void rtc_DS1307_writeTime(char* time, char hourFormat, char pm) {
             WriteI2C(time[i]);
         }
     }
-    CloseI2C();
+    StopI2C();
     IdleI2C();
 }
 
@@ -175,7 +175,7 @@ void rtc_DS1307_writeDate(char* date) {
     for (i = 0; i < RTC_DS1307_DATE_ARRAY_SIZE; i++) {
         WriteI2C(date[i]);
     }
-    CloseI2C();
+    StopI2C();
     IdleI2C();
 }
 
