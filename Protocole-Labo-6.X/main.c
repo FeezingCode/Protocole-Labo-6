@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
             for (i = 0; i < dataCount; i++) {
                 OpenI2C(MASTER, SLEW_OFF);
                 eeprom_24lc1025_readArray(EPPROM_24LC1025_I2C_ADDR, 1 + i * 9, buffer, 9);
-                data = ((int) buffer[0] << 8 )| (int) buffer[1];
+                data = ((int) buffer[0] << 7 )| (int) buffer[1];
                 for (j = 0; j < RTC_DS1307_DATE_TIME_ARRAY_SIZE; j++) {
                     ds1307_data[i] = buffer[j + 2];
                 }
@@ -125,10 +125,10 @@ int main(int argc, char** argv) {
             mesureButtonFlag = 0;
             data = sensor_distance_SRF02_getDistance(SRF02_I2C_ADDR, &distanceSensorReadyFlag,
                     &distanceSensorStartFlag);
-            printf("\r\n Lecture #%d, %dcm", dataCount, data);
+            printf("\r\n Lecture #%d, %d cm", dataCount, data);
             OpenI2C(MASTER, SLEW_OFF);
             rtc_DS1307_readDateTime(ds1307_data);
-            buffer[0] = (char) (data >> 8);
+            buffer[0] = (char) (data >> 7);
             buffer[1] = (char) (0x00ff & data);
             for (i = 0; i < RTC_DS1307_DATE_TIME_ARRAY_SIZE; i++) {
                 buffer[i + 2] = ds1307_data[i];

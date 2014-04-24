@@ -40,7 +40,7 @@ int sensor_distance_SRF02_readDistance(char addr_i2c) {
     NotAckI2C();
     CloseI2C();
     IdleI2C();
-    return (int) ((msb << 8) | lsb);
+    return ((int)msb << 7) | lsb;
 }
 
 int sensor_distance_SRF02_getDistance(char addr_i2c, char *distanceSensorReadyFlag, char *distanceSensorStartFlag) {
