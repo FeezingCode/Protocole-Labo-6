@@ -7,7 +7,7 @@ void eeprom_24lc1025_write(char addr_i2c, int addr, char data) {
     WriteI2C((char) (addr >> 8));
     WriteI2C((char) (addr & 0x00ff));
     WriteI2C(data);
-    CloseI2C();
+    StopI2C();
     IdleI2C();
 }
 
@@ -21,7 +21,7 @@ void eeprom_24lc1025_writeArray(char addr_i2c, int addr, char *data, char size) 
     for (i = 0; i < size; i++) {
         WriteI2C(data[i]);
     }
-    CloseI2C();
+    StopI2C();
     IdleI2C();
 }
 
@@ -33,10 +33,11 @@ char eeprom_24lc1025_read(char addr_i2c, int addr) {
     WriteI2C((char) (addr >> 8));
     WriteI2C((char) (addr & 0x00ff));
     RestartI2C();
+    IdleI2C();
     WriteI2C(addr_i2c | 0x01);
     data = ReadI2C();
     NotAckI2C();
-    CloseI2C();
+    StopI2C();
     IdleI2C();
     return data;
 }
@@ -49,6 +50,7 @@ void eeprom_24lc1025_readArray(char addr_i2c, int addr, char *data, char size) {
     WriteI2C((char) (addr >> 8));
     WriteI2C((char) (addr & 0x00ff));
     RestartI2C();
+    IdleI2C();
     WriteI2C(addr_i2c | 0x01);
     for (i = 0; i < size; i++) {
         data[i] = ReadI2C();
@@ -58,6 +60,6 @@ void eeprom_24lc1025_readArray(char addr_i2c, int addr, char *data, char size) {
             NotAckI2C();
         }
     }
-    CloseI2C();
+    StopI2C();
     IdleI2C();
 }

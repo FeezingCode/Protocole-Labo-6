@@ -16,10 +16,7 @@
 #define RS232_PBRG      12
 
 #define SRF02_I2C_ADDR              0xE0
-#define EPPROM_24LC1025_I2C_ADDR    0x50
-
-#define UPLOAD_BUTTON               PORTBbits.RB4
-#define MESURE_BUTTON               PORTBbits.RB3
+#define EPPROM_24LC1025_I2C_ADDR    0xA0
 
 #define BUFFER_SIZE                  20
 
@@ -47,16 +44,19 @@ void interrupt ISR();
 int main(int argc, char** argv) {
     char buffer[BUFFER_SIZE] = {0};
     char ds1307_data[RTC_DS1307_DATE_TIME_ARRAY_SIZE]; // registres 0 a 6 du ds1307
-    char weeks_day_french[7][9] = {"dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"};
+    char weeks_day_french[7][9] = {"Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"};
     char user_input = 0;
     int i = 0;
-    int j = 0;
-    int dataCount = 0;
+    int j = 0;   
     int data = 0;
+    unsigned char dataCount = 0;
 
     OSCCON = 0b01110010;
     ADCON1 = 0xff;
     T0CON = 0b11000001;
+    INT0IF = 0;
+    INT1IF = 0;
+    INT2IF = 0;
     INTCON |= (1 << 7) | (1 << 4) | (1 << 5);
     INTCON2 &= ~((1 << 6) | (1 << 5) | (1 << 4));
     INTCON3 &= (1 << 3) | (1 << 4);
@@ -65,13 +65,19 @@ int main(int argc, char** argv) {
     OpenUSART(RS232_CONFIG, RS232_PBRG); //9600 BAUD, rs232
     OpenI2C(MASTER, SLEW_OFF);
     SSPADD = 0x13; //SSPAD = Fosc/(4*Fscl)-1, 100 khz
-
+    //    StartI2C();
+    //    IdleI2C();
+    //    WriteI2C(RTC_DS1307_TIME_I2C_ADDR);
+    //    WriteI2C(RTC_DS1307_REGISTER_SEC);
+    //    WriteI2C((0<<7));
+    //    CloseI2C();
+    //    IdleI2C();
     printf("\n\rLabo I2C: Appareil de mesure de distances\n\r");
     rtc_DS1307_readDateTime(ds1307_data);
-    printf("%s, %d:%d, %d-%d-%d", weeks_day_french[ds1307_data[RTC_DS1307_DATE_ARRAY_DAY]],
-            ds1307_data[RTC_DS1307_TIME_ARRAY_HR], ds1307_data[RTC_DS1307_TIME_ARRAY_MIN],
-            ds1307_data[RTC_DS1307_DATE_ARRAY_YEAR] + 2000, ds1307_data[RTC_DS1307_DATE_ARRAY_MONTH],
-            ds1307_data[RTC_DS1307_DATE_ARRAY_DATE]); // Afficher jour-date-temps(sauf secondes)
+    printf("%s, %d:%d, %d-%d-%d\n\r", weeks_day_french[ds1307_data[RTC_DS1307_DATE_TIME_ARRAY_DAY] - 1],
+            ds1307_data[RTC_DS1307_DATE_TIME_ARRAY_HR], ds1307_data[RTC_DS1307_DATE_TIME_ARRAY_MIN],
+            ds1307_data[RTC_DS1307_DATE_TIME_ARRAY_YEAR] + 2000, ds1307_data[RTC_DS1307_DATE_TIME_ARRAY_MONTH],
+            ds1307_data[RTC_DS1307_DATE_TIME_ARRAY_DATE]); // Afficher jour-date-temps(sauf secondes)
     puts("Configuration de l'horloge (o/n)?");
     user_input = getch();
     if (user_input == 'o') {
@@ -90,10 +96,10 @@ int main(int argc, char** argv) {
         ds1307_data[RTC_DS1307_DATE_TIME_ARRAY_SEC] = 0; //Sec = default value, 0
         rtc_DS1307_writeDateTime(ds1307_data, RTC_DS1307_HR_FORMAT_24H, 0);
         printf("\r\nTemps modifie avec succes!\r\n");
-        printf("%s, %d:%d, %d-%d-%d", weeks_day_french[ds1307_data[RTC_DS1307_DATE_ARRAY_DAY]],
-                ds1307_data[RTC_DS1307_TIME_ARRAY_HR], ds1307_data[RTC_DS1307_TIME_ARRAY_MIN],
-                ds1307_data[RTC_DS1307_DATE_ARRAY_YEAR] + 2000, ds1307_data[RTC_DS1307_DATE_ARRAY_MONTH],
-                ds1307_data[RTC_DS1307_DATE_ARRAY_DATE]);
+        printf("%s, %d:%d, %d-%d-%d", weeks_day_french[ds1307_data[RTC_DS1307_DATE_TIME_ARRAY_DAY] - 1],
+                ds1307_data[RTC_DS1307_DATE_TIME_ARRAY_HR], ds1307_data[RTC_DS1307_DATE_TIME_ARRAY_MIN],
+                ds1307_data[RTC_DS1307_DATE_TIME_ARRAY_YEAR] + 2000, ds1307_data[RTC_DS1307_DATE_TIME_ARRAY_MONTH],
+                ds1307_data[RTC_DS1307_DATE_TIME_ARRAY_DATE]);
     }
     printf("\r\nPret pour mesurer!\r\n");
     uploadButtonFlag = 0;
@@ -105,29 +111,34 @@ int main(int argc, char** argv) {
             uploadButtonFlag = 0;
             for (i = 0; i < dataCount; i++) {
                 eeprom_24lc1025_readArray(EPPROM_24LC1025_I2C_ADDR, 1 + i * 9, buffer, 9);
+<<<<<<< HEAD
                 data = ((int) buffer[0]) << 8 | (int) buffer[1];
+=======
+                data = ((int) buffer[0] << 8 )| (int) buffer[1];
+>>>>>>> 4b74809f4d9dfd0bb23c30521d8055b6d781eba3
                 for (j = 0; j < RTC_DS1307_DATE_TIME_ARRAY_SIZE; j++) {
                     ds1307_data[j] = buffer[j + 2];
                 }
                 printf("\r\nMesure #%d : %d cm (%d:%d, %d-%d-%d)", i, data,
-                        ds1307_data[RTC_DS1307_TIME_ARRAY_HR], ds1307_data[RTC_DS1307_TIME_ARRAY_MIN],
-                        ds1307_data[RTC_DS1307_DATE_ARRAY_YEAR] + 2000, ds1307_data[RTC_DS1307_DATE_ARRAY_MONTH],
-                        ds1307_data[RTC_DS1307_DATE_ARRAY_DATE]);
+                        ds1307_data[RTC_DS1307_DATE_TIME_ARRAY_HR], ds1307_data[RTC_DS1307_DATE_TIME_ARRAY_MIN],
+                        ds1307_data[RTC_DS1307_DATE_TIME_ARRAY_YEAR] + 2000, ds1307_data[RTC_DS1307_DATE_TIME_ARRAY_MONTH],
+                        ds1307_data[RTC_DS1307_DATE_TIME_ARRAY_DATE]);
             }
         }
         if (mesureButtonFlag) {
             mesureButtonFlag = 0;
             data = sensor_distance_SRF02_getDistance(SRF02_I2C_ADDR, &distanceSensorReadyFlag,
                     &distanceSensorStartFlag);
+            printf("\r\n Lecture #%d, %d cm", dataCount, data);
             rtc_DS1307_readDateTime(ds1307_data);
             buffer[0] = (char) (data >> 8);
             buffer[1] = (char) (0x00ff & data);
             for (i = 0; i < RTC_DS1307_DATE_TIME_ARRAY_SIZE; i++) {
                 buffer[i + 2] = ds1307_data[i];
-            }
-            dataCount++;
+            }            
             eeprom_24lc1025_write(EPPROM_24LC1025_I2C_ADDR, 0, dataCount);
             eeprom_24lc1025_writeArray(EPPROM_24LC1025_I2C_ADDR, 1 + dataCount * 9, buffer, 9);
+            dataCount++;
         }
         if (eraseButtonFlag) {
             eraseButtonFlag = 0;

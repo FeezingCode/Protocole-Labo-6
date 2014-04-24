@@ -20,7 +20,8 @@ char getData(char* message, char* buffer, int buffer_size, char min, char max) {
     char invalidData = 0;
     char data = 0;
     printf(message);
-    fgets(buffer, buffer_size);
+    //fgets(buffer, buffer_size);
+    gets(buffer);
     data = extractData(buffer, min, max, &invalidData);
     if(invalidData){
         return min;
