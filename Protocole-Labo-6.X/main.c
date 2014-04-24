@@ -33,8 +33,11 @@
 #pragma config  WDT = OFF, DEBUG = ON, LVP = OFF
 
 char uploadButtonFlag = 0;
+char uploadButtonDebounceCounter = 0;
 char mesureButtonFlag = 0;
+char mesureButtonDebounceCounter = 0;
 char eraseButtonFlag = 0;
+char eraseButtonDebounceCounter = 0;
 char distanceSensorReadyFlag = 0;
 char distanceSensorStartFlag = 0;
 char distanceSensorCounter = 0;
@@ -47,7 +50,7 @@ int main(int argc, char** argv) {
     char weeks_day_french[7][9] = {"Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"};
     char user_input = 0;
     int i = 0;
-    int j = 0;   
+    int j = 0;
     int data = 0;
     unsigned char dataCount = 0;
 
@@ -112,7 +115,7 @@ int main(int argc, char** argv) {
             for (i = 0; i < dataCount; i++) {
                 eeprom_24lc1025_readArray(EPPROM_24LC1025_I2C_ADDR, 1 + i * 9, buffer, 9);
                 data = ((int) buffer[0]) << 8 | (int) buffer[1];
-                for (j = 0; j < RTC_DS1307_DATE_TIME_ARRAY_SIZE; j++){
+                for (j = 0; j < RTC_DS1307_DATE_TIME_ARRAY_SIZE; j++) {
                     ds1307_data[j] = buffer[j + 2];
                 }
                 printf("\r\nMesure #%d : %d cm (%d:%d, %d-%d-%d)", i, data,
@@ -131,7 +134,7 @@ int main(int argc, char** argv) {
             buffer[1] = (char) (0x00ff & data);
             for (i = 0; i < RTC_DS1307_DATE_TIME_ARRAY_SIZE; i++) {
                 buffer[i + 2] = ds1307_data[i];
-            }            
+            }
             eeprom_24lc1025_write(EPPROM_24LC1025_I2C_ADDR, 0, dataCount);
             eeprom_24lc1025_writeArray(EPPROM_24LC1025_I2C_ADDR, 1 + dataCount * 9, buffer, 9);
             dataCount++;
@@ -154,6 +157,24 @@ void interrupt ISR() {
                 distanceSensorReadyFlag = 1;
             }
         }
+        if (uploadButtonDebounceCounter > 0) {
+            uploadButtonDebounceCounter--;
+            if (uploadButtonDebounceCounter == 0){
+                uploadButtonFlag = 1;
+            }
+        }
+        if (mesureButtonDebounceCounter > 0) {
+            mesureButtonDebounceCounter--;
+            if (mesureButtonDebounceCounter == 0){
+                mesureButtonFlag =1;
+            }
+        }
+        if (eraseButtonDebounceCounter > 0) {
+            eraseButtonDebounceCounter--;
+            if (eraseButtonDebounceCounter == 0){
+                eraseButtonFlag = 1;
+            }
+        }
         if (distanceSensorStartFlag) {
             distanceSensorStartFlag = 0;
             distanceSensorCounter = 146; //Set the counter for approximately 74,752 ms
@@ -161,14 +182,14 @@ void interrupt ISR() {
     }
     if (INTCON & (1 << 1)) {//INT0
         INTCON &= ~(1 << 1);
-        mesureButtonFlag = 1;
+        mesureButtonDebounceCounter = 50;
     }
     if (INTCON3 & (1 << 0)) {//INT1
         INTCON3 &= ~(1 << 0);
-        uploadButtonFlag = 1;
+        uploadButtonDebounceCounter = 50;
     }
     if (INTCON3 & (1 << 1)) {//INT2
         INTCON3 &= ~(1 << 1);
-        eraseButtonFlag = 1;
+        eraseButtonDebounceCounter = 50;
     }
 }
