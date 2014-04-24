@@ -159,19 +159,19 @@ void interrupt ISR() {
         }
         if (uploadButtonDebounceCounter > 0) {
             uploadButtonDebounceCounter--;
-            if (uploadButtonDebounceCounter == 0){
+            if (uploadButtonDebounceCounter == 0) {
                 uploadButtonFlag = 1;
             }
         }
         if (mesureButtonDebounceCounter > 0) {
             mesureButtonDebounceCounter--;
-            if (mesureButtonDebounceCounter == 0){
-                mesureButtonFlag =1;
+            if (mesureButtonDebounceCounter == 0) {
+                mesureButtonFlag = 1;
             }
         }
         if (eraseButtonDebounceCounter > 0) {
             eraseButtonDebounceCounter--;
-            if (eraseButtonDebounceCounter == 0){
+            if (eraseButtonDebounceCounter == 0) {
                 eraseButtonFlag = 1;
             }
         }
@@ -182,14 +182,20 @@ void interrupt ISR() {
     }
     if (INTCON & (1 << 1)) {//INT0
         INTCON &= ~(1 << 1);
-        mesureButtonDebounceCounter = 50;
+        if (mesureButtonDebounceCounter == 0) {
+            mesureButtonDebounceCounter = 20;
+        }
     }
     if (INTCON3 & (1 << 0)) {//INT1
         INTCON3 &= ~(1 << 0);
-        uploadButtonDebounceCounter = 50;
+        if (uploadButtonDebounceCounter == 0) {
+            uploadButtonDebounceCounter = 20;
+        }
     }
     if (INTCON3 & (1 << 1)) {//INT2
         INTCON3 &= ~(1 << 1);
-        eraseButtonDebounceCounter = 50;
+        if (eraseButtonDebounceCounter == 0) {
+            eraseButtonDebounceCounter = 20;
+        }
     }
 }
