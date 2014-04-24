@@ -183,19 +183,19 @@ void interrupt ISR() {
     if (INTCON & (1 << 1)) {//INT0
         INTCON &= ~(1 << 1);
         if (mesureButtonDebounceCounter == 0) {
-            mesureButtonDebounceCounter = 20;
+            mesureButtonDebounceCounter = 35;
         }
     }
     if (INTCON3 & (1 << 0)) {//INT1
         INTCON3 &= ~(1 << 0);
         if (uploadButtonDebounceCounter == 0) {
-            uploadButtonDebounceCounter = 20;
+            uploadButtonDebounceCounter = 35;
         }
     }
     if (INTCON3 & (1 << 1)) {//INT2
         INTCON3 &= ~(1 << 1);
         if (eraseButtonDebounceCounter == 0) {
-            eraseButtonDebounceCounter = 20;
+            eraseButtonDebounceCounter = 35;
         }
     }
 }
