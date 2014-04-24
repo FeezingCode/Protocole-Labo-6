@@ -96,15 +96,18 @@ int main(int argc, char** argv) {
                 ds1307_data[RTC_DS1307_DATE_ARRAY_DATE]);
     }
     printf("\r\nPret pour mesurer!\r\n");
+    uploadButtonFlag = 0;
+    mesureButtonFlag = 0;
+    eraseButtonFlag = 0;
     dataCount = eeprom_24lc1025_read(EPPROM_24LC1025_I2C_ADDR, 0);
     while (1) {
         if (uploadButtonFlag) {
             uploadButtonFlag = 0;
             for (i = 0; i < dataCount; i++) {
                 eeprom_24lc1025_readArray(EPPROM_24LC1025_I2C_ADDR, 1 + i * 9, buffer, 9);
-                data = (int) buffer[0] << 8 | (int) buffer[1];
+                data = ((int) buffer[0]) << 8 | (int) buffer[1];
                 for (j = 0; j < RTC_DS1307_DATE_TIME_ARRAY_SIZE; j++) {
-                    ds1307_data[i] = buffer[j + 2];
+                    ds1307_data[j] = buffer[j + 2];
                 }
                 printf("\r\nMesure #%d : %d cm (%d:%d, %d-%d-%d)", i, data,
                         ds1307_data[RTC_DS1307_TIME_ARRAY_HR], ds1307_data[RTC_DS1307_TIME_ARRAY_MIN],

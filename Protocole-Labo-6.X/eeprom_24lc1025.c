@@ -12,7 +12,7 @@ void eeprom_24lc1025_write(char addr_i2c, int addr, char data) {
 }
 
 void eeprom_24lc1025_writeArray(char addr_i2c, int addr, char *data, char size) {
-    int i = 0;
+    char i = 0;
     StartI2C();
     IdleI2C();
     WriteI2C(addr_i2c);
@@ -42,7 +42,7 @@ char eeprom_24lc1025_read(char addr_i2c, int addr) {
 }
 
 void eeprom_24lc1025_readArray(char addr_i2c, int addr, char *data, char size) {
-    int i = 0;
+    char i = 0;
     StartI2C();
     IdleI2C();
     WriteI2C(addr_i2c);
