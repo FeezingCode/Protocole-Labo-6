@@ -6,8 +6,8 @@ char rtc_DS1307_BCD_to_binary(char bcd) {
 
 char rtc_DS1307_binary_to_BCD(char binary) {
     char bcd = binary % 10;
-    binary &= 0xF0;
-    bcd |= binary;
+    binary /= 10;
+    bcd |= (binary<<4);
     return bcd;
 }
 
